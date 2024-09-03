@@ -103,11 +103,11 @@ The default Verifuer UI can only deployed on the `/` context root. As we want to
 1. Clone the original [repository](https://github.com/eu-digital-identity-wallet/eudi-web-verifier).
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
-    # cd <cloned-repo>
-    # patch -p1 <verifier-ui>/package.json.patch
+    cd <cloned-repo>
+    patch -p1 <verifier-ui>/package.json.patch
     ```
 3. Build the container:
     ```
-    # cd <cloned-repo>
-    # docker build -t verifier-ui .
+    cd <cloned-repo>
+    docker build -t verifier-ui .
     ```

@@ -109,6 +109,5 @@ The default Verifuer UI can only deployed on the `/` context root. As we want to
 3. Build the container:
     ```
     # cd <cloned-repo>
-    # cp <verifier-ui>/Dockerfile .
     # docker build -t verifier-ui .
     ```

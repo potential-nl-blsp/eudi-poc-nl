@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index f7c9693..631bb76 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,7 @@
+   "scripts": {
+     "ng": "ng",
+     "start": "npm run config && ng serve --proxy-config src/proxy.conf.json",
+-    "build": "npm run config && ng build --build-optimizer --configuration=production",
++    "build": "npm run config && ng build --build-optimizer --configuration=production --base-href  ./ --deploy-url ./",
+     "watch": "npm run config && ng build --watch --configuration=development",
+     "config": "node set-env.js",
+     "test": "ng test",

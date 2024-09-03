@@ -1,5 +1,5 @@
 version: "2"
-authtoken: "2jNT9IFj9OtrbpW50ABJEcQyfD9_8nvGLXXPxGZaA3SSwhuG"
+authtoken: {AUTH_TOKEN}
 web_addr: 0.0.0.0:8081
 update: false
 log: stdout

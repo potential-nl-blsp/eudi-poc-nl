@@ -74,12 +74,12 @@ classDiagram
 
  1. Clone this repository
  1. Obtain a free [ngrok](https://ngrok.com/) domain (account required).
- 3. Replace all occurrences of {NGROK-DOMAIN} with your own domain in the following files:
+ 3. Replace all occurrences of `{NGROK-DOMAIN}` with your own domain in the following files:
     - ngrok/ngrok.yml
     - haproxy/haproxy.conf
     - nginx/crl-server.conf
     - docker-compose.yaml
-4. In ngrok/ngrok.yml replace {AUTH_TOKEN} with your ngrok authentication token.
+4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:
     - root certificate (if using an own root certificate)
     - issuer certificate (one separate for each issuer, if so desired), issued by the CA

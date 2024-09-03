@@ -1,0 +1,207 @@
+networks:
+  ingress:
+    driver: bridge
+  py-issuer:
+    driver: bridge
+  kt-issuer:
+    driver: bridge
+  verifier:
+    driver: bridge
+
+services:
+  py-issuer:
+    image: py-issuer:latest
+    container_name: py-issuer
+    environment:
+      - FLASK_DEBUG=1
+    volumes:
+      - ./py-issuer/config/app_config/:/opt/py-issuer/app/app_config/
+      - ./py-issuer/config/metadata_config/:/opt/py-issuer/app/metadata_config/
+      - ./py-issuer/config/cert/:/opt/py-issuer/cert/
+      - ./py-issuer/config/keys/:/opt/py-issuer/keys/
+      - ./py-issuer/logs/:/var/log/py-issuer/:rw
+    networks:
+      - py-issuer
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    depends_on:
+      - haproxy
+    ports:
+      - 8081:8081
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok.yml"
+    volumes:
+      - ./ngrok/ngrok.yml:/etc/ngrok.yml
+    networks:
+      - ingress
+
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    ports:
+      - "80:80"
+    depends_on: #otherwise cannot resolve container names over Docker network
+      - crl
+      - verifier-ui
+      - verifier
+      - py-issuer
+        #condition: service_started
+      - keycloak
+      - pid-issuer
+    volumes:
+      - ./haproxy/haproxy.conf:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - ingress
+      - py-issuer
+      - kt-issuer
+      - verifier
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3-0
+    container_name: keycloak
+    command:
+      - start-dev
+      - --import-realm
+        #      - --features=dpop
+    environment:
+      - KC_PROXY=edge
+      - KC_HTTP_RELATIVE_PATH=/idp
+        #- KC_HOSTNAME={NGROK_DOMAIN}
+      - KC_HOSTNAME_URL=https://{NGROK_DOMAIN}/idp
+      - KC_HOSTNAME_ADMIN_URL=https://{NGROK_DOMAIN}/idp
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HTTPS_CERTIFICATE_FILE=/etc/ssl/certs/keycloak.tls.crt
+      - KC_HTTPS_CERTIFICATE_KEY_FILE=/etc/ssl/certs/keycloak.tls.key
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
+      - KC_SPI_THEME_STATIC_MAX_AGE=-1
+      - KC_SPI_THEME_CACHE_THEMES=false
+      - KC_SPI_THEME_CACHE_TEMPLATES=false
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=password
+    healthcheck:
+      test: "bash /opt/keycloak/health-check.sh"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    volumes:
+      - ./kt-issuer/keycloak/extra/health-check.sh:/opt/keycloak/health-check.sh
+      - ./kt-issuer/keycloak/realms/:/opt/keycloak/data/import
+      - ./kt-issuer/keycloak/themes/:/opt/keycloak/themes
+      - ./kt-issuer/keycloak/certs/:/etc/ssl/certs/
+    networks:
+      - kt-issuer
+
+  pid-issuer:
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-pid-issuer:latest
+    pull_policy: always
+    container_name: pid-issuer
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=insecure
+      - SPRING_WEBFLUX_BASE_PATH=/pid-issuer
+      - SERVER_PORT=8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID=pid-issuer-srv
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET=zIKAV9DIIIaJCzHCVBPlySgU8KgY68U2
+      - SERVER_FORWARD_HEADERS_STRATEGY=FRAMEWORK
+      - ISSUER_PUBLICURL=https://{NGROK_DOMAIN}/pid-issuer
+      - ISSUER_AUTHORIZATIONSERVER_PUBLICURL=https://{NGROK_DOMAIN}/idp/realms/pid-issuer-realm
+      - ISSUER_AUTHORIZATIONSERVER_METADATA=https://keycloak:8443/idp/realms/pid-issuer-realm/.well-known/openid-configuration
+      - ISSUER_AUTHORIZATIONSERVER_INTROSPECTION=https://keycloak:8443/idp/realms/pid-issuer-realm/protocol/openid-connect/token/introspect
+      - ISSUER_CREDENTIALRESPONSEENCRYPTION_SUPPORTED=true
+      - ISSUER_CREDENTIALRESPONSEENCRYPTION_REQUIRED=true
+      - ISSUER_CREDENTIALRESPONSEENCRYPTION_ALGORITHMSSUPPORTED=RSA-OAEP-256
+      - ISSUER_CREDENTIALRESPONSEENCRYPTION_ENCRYPTIONMETHODS=A128CBC-HS256
+      - ISSUER_PID_MSO_MDOC_ENABLED=true
+      - ISSUER_PID_MSO_MDOC_ENCODER_DURATION=P30D
+      - ISSUER_PID_MSO_MDOC_NOTIFICATIONS_ENABLED=true
+      - ISSUER_PID_SD_JWT_VC_ENABLED=true
+      - ISSUER_PID_SD_JWT_VC_NOTUSEBEFORE=PT20
+      - ISSUER_PID_SD_JWT_VC_DEFERRED=true
+      - ISSUER_PID_SD_JWT_VC_NOTIFICATIONS_ENABLED=true
+      - ISSUER_PID_ISSUINGCOUNTRY=NL
+      - ISSUER_MDL_ENABLED=true
+      - ISSUER_MDL_MSO_MDOC_ENCODER_DURATION=P5D
+      - ISSUER_MDL_NOTIFICATIONS_ENABLED=true
+      - ISSUER_CREDENTIALOFFER_URI=openid-credential-offer://
+      - ISSUER_SIGNING_KEY=LoadFromKeystore
+      - ISSUER_SIGNING_KEY_KEYSTORE=file:///kt-issuer.p12
+      - ISSUER_SIGNING_KEY_KEYSTORE_TYPE=PKCS12
+      - ISSUER_SIGNING_KEY_KEYSTORE_PASSWORD=abc123
+      - ISSUER_SIGNING_KEY_ALIAS=signingKey
+      - ISSUER_SIGNING_KEY_PASSWORD=abc123
+      - ISSUER_KEYCLOAK_SERVER_URL=https://keycloak:8443/idp
+      - ISSUER_KEYCLOAK_AUTHENTICATION_REALM=master
+      - ISSUER_KEYCLOAK_CLIENT_ID=admin-cli
+      - ISSUER_KEYCLOAK_USERNAME=admin
+      - ISSUER_KEYCLOAK_PASSWORD=password
+      - ISSUER_KEYCLOAK_USER_REALM=pid-issuer-realm
+      - ISSUER_DPOP_PROOF_MAX_AGE=PT1M
+      - ISSUER_DPOP_CACHE_PURGE_INTERVAL=PT10M
+      - ISSUER_DPOP_REALM=pid-issuer
+    volumes:
+      - /opt/eudiw/ca/kt-issuer2.p12:/kt-issuer.p12:ro
+    networks:
+      - kt-issuer
+
+  verifier:
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.4
+    container_name: verifier-backend
+      #ports:
+      #- "8080:8080"
+    environment:
+      VERIFIER_PUBLICURL: "https://{NGROK_DOMAIN}"
+      VERIFIER_RESPONSE_MODE: "DirectPostJwt"
+        #VERIFIER_RESPONSE_MODE: "DirectPost"
+        #VERIFIER_CLIENTID: "wallet-dev"
+        #VERIFIER_CLIENTIDSCHEME: "pre-registered"
+      VERIFIER_CLIENTID: "{NGROK_DOMAIN}"
+      #VERIFIER_CLIENTID: "Verifier"
+      VERIFIER_CLIENTIDSCHEME: "x509_san_dns"
+        #      VERIFIER_JWK_EMBED: "ByValue"
+      VERIFIER_JAR_SIGNING_ALGORITHM: "ES256"
+      VERIFIER_JAR_SIGNING_KEY: "LoadFromKeystore"
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE: "file:///verifier.p12"
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_TYPE: "PKCS12"
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD: "abc123"
+      VERIFIER_JAR_SIGNING_KEY_ALIAS: "verifier"
+      VERIFIER_JAR_SIGNING_KEY_PASSWORD: "abc123"
+      TZ: "Europe/Amsterdam"
+    volumes:
+      #- /opt/eudiw/verifier-backend/exp/local/verifier2.p12:/verifier.p12:ro
+      - /opt/eudiw/ca/verifier.p12:/verifier.p12:ro
+    networks:
+      - verifier
+
+  verifier-ui:
+    #image: ghcr.io/eu-digital-identity-wallet/eudi-web-verifier:latest
+    image: verifier-ui:latest
+    container_name: verifier-ui
+      #ports:
+      #- "4300:4300"
+    environment:
+      - DOMAIN_NAME="{NGROK_DOMAIN}"
+      - HOST_API="https://{NGROK_DOMAIN}"
+      #      - HOST_API="http://verifier-backend:8080"
+    networks:
+      - verifier
+
+  crl:
+    image: nginx:latest
+    container_name: crl
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/eudiw/ca/crl/eudiw-poc-nl-root-ca-01.crl:/var/www/ca/eudiw-poc-nl-root-ca-01.crl:ro
+      - ./nginx/:/etc/nginx/conf.d/:ro
+    networks:
+      - verifier

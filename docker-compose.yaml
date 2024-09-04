@@ -45,12 +45,11 @@ services:
     container_name: haproxy
     ports:
       - "80:80"
-    depends_on: #otherwise cannot resolve container names over Docker network
+    depends_on:
       - crl
       - verifier-ui
       - verifier
       - py-issuer
-        #condition: service_started
       - keycloak
       - pid-issuer
     volumes:
@@ -136,9 +135,9 @@ services:
       - ISSUER_SIGNING_KEY=LoadFromKeystore
       - ISSUER_SIGNING_KEY_KEYSTORE=file:///kt-issuer.p12
       - ISSUER_SIGNING_KEY_KEYSTORE_TYPE=PKCS12
-      - ISSUER_SIGNING_KEY_KEYSTORE_PASSWORD=abc123
+      - ISSUER_SIGNING_KEY_KEYSTORE_PASSWORD=
       - ISSUER_SIGNING_KEY_ALIAS=signingKey
-      - ISSUER_SIGNING_KEY_PASSWORD=abc123
+      - ISSUER_SIGNING_KEY_PASSWORD=
       - ISSUER_KEYCLOAK_SERVER_URL=https://keycloak:8443/idp
       - ISSUER_KEYCLOAK_AUTHENTICATION_REALM=master
       - ISSUER_KEYCLOAK_CLIENT_ID=admin-cli
@@ -156,8 +155,6 @@ services:
   verifier:
     image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.4
     container_name: verifier-backend
-      #ports:
-      #- "8080:8080"
     environment:
       VERIFIER_PUBLICURL: "https://{NGROK_DOMAIN}"
       VERIFIER_RESPONSE_MODE: "DirectPostJwt"
@@ -172,26 +169,21 @@ services:
       VERIFIER_JAR_SIGNING_KEY: "LoadFromKeystore"
       VERIFIER_JAR_SIGNING_KEY_KEYSTORE: "file:///verifier.p12"
       VERIFIER_JAR_SIGNING_KEY_KEYSTORE_TYPE: "PKCS12"
-      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD: "abc123"
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD: ""
       VERIFIER_JAR_SIGNING_KEY_ALIAS: "verifier"
-      VERIFIER_JAR_SIGNING_KEY_PASSWORD: "abc123"
+      VERIFIER_JAR_SIGNING_KEY_PASSWORD: ""
       TZ: "Europe/Amsterdam"
     volumes:
-      #- /opt/eudiw/verifier-backend/exp/local/verifier2.p12:/verifier.p12:ro
       - /opt/eudiw/ca/verifier.p12:/verifier.p12:ro
     networks:
       - verifier
 
   verifier-ui:
-    #image: ghcr.io/eu-digital-identity-wallet/eudi-web-verifier:latest
     image: verifier-ui:latest
     container_name: verifier-ui
-      #ports:
-      #- "4300:4300"
     environment:
       - DOMAIN_NAME="{NGROK_DOMAIN}"
       - HOST_API="https://{NGROK_DOMAIN}"
-      #      - HOST_API="http://verifier-backend:8080"
     networks:
       - verifier
 

@@ -1,0 +1,11 @@
+{
+  "credential_issuer": "https://{NGROK_DOMAIN}",
+  "credential_endpoint": "https://{NGROK_DOMAIN}/credential",
+  "batch_credential_endpoint": "https://{NGROK_DOMAIN}/batch_credential",
+  "notification_endpoint": "https://{NGROK_DOMAIN}/notification",
+  "deferred_credential_endpoint": "https://{NGROK_DOMAIN}/deferred_credential",
+  "credential_configurations_supported": {
+    
+
+  }
+}

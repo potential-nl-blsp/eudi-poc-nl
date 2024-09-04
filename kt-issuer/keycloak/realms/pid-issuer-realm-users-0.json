@@ -1,0 +1,85 @@
+{
+  "realm" : "pid-issuer-realm",
+  "users" : [ {
+    "id" : "0e3895a9-2d92-45ac-81e4-719b5003aaff",
+    "username" : "pipo",
+    "firstName" : "Pipo",
+    "lastName" : "de Clown",
+    "email" : "pipo.de.clown@example.eu",
+    "emailVerified" : true,
+    "attributes" : {
+      "country" : [ "NL" ],
+      "birthdate" : [ "1980-04-03" ],
+      "gender" : [ "1" ],
+      "age_over_18" : [ "true" ],
+      "age_over_21" : [ "true" ],
+      "age_over_65" : [ "false" ]
+    },
+    "createdTimestamp" : 1721743275640,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "ec866b08-fe95-49a6-a48f-ea5068585c4b",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1721743502630,
+      "secretData" : "{\"value\":\"RCbntjZz5B0gjYfOIohjvcbRSxnW9XfpjsTnU8Bz+T5Eu7tHy31XsvaP0GCcLEoF0HIk99nGGtJldAMpKh/aYA==\",\"salt\":\"iTXkMqWNxWLMe0IUBg84Pw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "eid-holder-natural-person" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "cfddc8df-b7b8-4038-a74d-1a6582a84989",
+    "username" : "service-account-pid-issuer-srv",
+    "emailVerified" : false,
+    "createdTimestamp" : 1700060675127,
+    "enabled" : true,
+    "totp" : false,
+    "serviceAccountClientId" : "pid-issuer-srv",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-pid-issuer-realm" ],
+    "clientRoles" : {
+      "pid-issuer-srv" : [ "uma_protection" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "60b8ba5f-c73f-4976-b0da-48d0e53335de",
+    "username" : "tneal",
+    "firstName" : "Tyler",
+    "lastName" : "Neal",
+    "email" : "tyler.neal@example.com",
+    "emailVerified" : true,
+    "attributes" : {
+      "country" : [ "AT" ],
+      "birthdate" : [ "1955-04-12" ],
+      "gender" : [ "1" ],
+      "age_over_18" : [ "true" ],
+      "street" : [ "101 Trauner" ],
+      "locality" : [ "Gemeinde Biberbach" ],
+      "region" : [ "Lower Austria" ],
+      "postal_code" : [ "3331" ]
+    },
+    "createdTimestamp" : 1700060364127,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "7af577bf-6f4c-43d7-b6d3-afb88fd32fc3",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1700060647131,
+      "secretData" : "{\"value\":\"MWxRnCLRAwva6RPIWKzR/2Ix8YpJ8kcBCcWEUb16/B0OLhem9Uy1A45mMzPluiMeeS0ZDM56y/+hRD5hRI02zg==\",\"salt\":\"KtXua4qvxx8+JxcNiWeskQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "eid-holder-natural-person" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

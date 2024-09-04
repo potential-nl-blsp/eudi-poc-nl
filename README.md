@@ -73,7 +73,7 @@ classDiagram
 
 
 ```
-## How to build Python issuer and Verifier UI container
+## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
 The Python issuer is not yet available as a Docker container, so we build one ourselves.
@@ -110,12 +110,12 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - nginx/crl-server.conf
     - docker-compose.yaml
     - py-issuer/config/app_config/config_service.py
-    - py-issuer/config/app_config/oid_config.py
-    - py-issuer/config/metadata_config/metadata_config.py
+    - py-issuer/config/app_config/oid_config.json
+    - py-issuer/config/metadata_config/metadata_config.json
     - py-issuer/config/metadata_config/openid-configuration.json
    You can use the command
    ```
-   perl -p -i -e 's/{NGROK-DOMAIN}/your-ngrok-domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.py py-issuer/config/metadata_config/metadata_config.py py-issuer/config/metadata_config/openid-configuration.json
+   perl -p -i -e 's/{NGROK-DOMAIN}/your-ngrok-domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json
    ```
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:

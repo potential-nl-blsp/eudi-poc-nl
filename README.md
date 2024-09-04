@@ -42,6 +42,10 @@ classDiagram
     
     class py-issuer["Issuer in Python"] { 
         /
+        *py-issuer/config/app_metadata/
+        *py-issuer/config/metadata_config/
+        *py-issuer/config/certs/
+        *py-issuer/config/trusted_cas/
     }
     
     class pid-issuer["Issuer in Kotlin"] {
@@ -50,6 +54,7 @@ classDiagram
 
     class keycloak["keycloak as IDP"] {
         /idp
+        *kt-issuer/keycloak/
     } 
 
     class crl {
@@ -92,7 +97,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
     cd <cloned-repo>
-    patch -p1 <verifier-ui>/package.json.patch
+    patch -p1 < <verifier-ui>/package.json.patch
     ```
 3. Build the container:
     ```
@@ -104,7 +109,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 
  1. Clone this repository
  1. Obtain a free [ngrok](https://ngrok.com/) domain (account required).
- 3. Replace all occurrences of `{NGROK-DOMAIN}` with your own domain in the following files:
+ 3. Replace all occurrences of `{NGROK_DOMAIN}` with your own domain in the following files:
     - ngrok/ngrok.yml
     - haproxy/haproxy.conf
     - nginx/crl-server.conf
@@ -114,9 +119,9 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - py-issuer/config/metadata_config/metadata_config.json
     - py-issuer/config/metadata_config/openid-configuration.json
    You can use the command
-   ```
-   perl -p -i -e 's/{NGROK-DOMAIN}/your-ngrok-domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json
-   ```
+    ```
+    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json
+    ```
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:
     - root certificate (if using an own root certificate; if so make sure the root certificate is included in the wallet build)
@@ -130,7 +135,14 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
         - VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD
         - VERIFIER_JAR_SIGNING_KEY_PASSWORD
 7. For the Python issuer:
-    - in py-issuer//config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
+    - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
     - in py-issuer/config add a directory keys and put there the private key and certifcate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
 8. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [section below on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
-9. Start the services using `docker compose up -d`
+9. If you are not using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
+10. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
+11. Access your services using https, at your Ngrok domain with context root:
+    - /verifier for the verifier,
+    - /pid-issuer for the Kotlin issuer,
+    - / for the Python issuer.
+
+    The API for the Verifier is available at context roots /ui and /wallet. See also the above diagram.

@@ -37,7 +37,7 @@ class ConfService:
 
     # BLSP: added separate configuration item for verifier backend URL
     verifier_backend_url = "https://{NGROK_DOMAIN}"
-    verifier_backend_url_no_scheme = "{NGROK_DOMAIN}"
+    verifier_backend_domain = "{NGROK_DOMAIN}"
 
     #wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
     wallet_test_url = "https://{NGROK_DOMAIN}/"

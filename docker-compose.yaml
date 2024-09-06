@@ -148,7 +148,7 @@ services:
       - ISSUER_DPOP_CACHE_PURGE_INTERVAL=PT10M
       - ISSUER_DPOP_REALM=pid-issuer
     volumes:
-      - /opt/eudiw/ca/kt-issuer2.p12:/kt-issuer.p12:ro
+      - {Kotlin_issuer_keystore_file_name}:/kt-issuer.p12:ro
     networks:
       - kt-issuer
 
@@ -174,7 +174,7 @@ services:
       VERIFIER_JAR_SIGNING_KEY_PASSWORD: ""
       TZ: "Europe/Amsterdam"
     volumes:
-      - /opt/eudiw/ca/verifier.p12:/verifier.p12:ro
+      - {verifier_keystore_file_name}:/verifier.p12:ro
     networks:
       - verifier
 
@@ -193,7 +193,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /opt/eudiw/ca/crl/eudiw-poc-nl-root-ca-01.crl:/var/www/ca/eudiw-poc-nl-root-ca-01.crl:ro
+      - {CRL_LOCATION}:/var/www/ca/eudiw-poc-nl-root-ca-01.crl:ro
       - ./nginx/:/etc/nginx/conf.d/:ro
     networks:
       - verifier

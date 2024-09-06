@@ -45,7 +45,7 @@ classDiagram
         /
         *py-issuer/config/app_metadata/
         *py-issuer/config/metadata_config/
-        *py-issuer/config/certs/
+        *py-issuer/config/keys/
         *py-issuer/config/trusted_cas/
     }
     
@@ -77,6 +77,14 @@ classDiagram
     verifier-ui --> verifier-backend
     py-issuer --> verifier-backend
 ```
+The setup contains the two issuers implemented in Python and Kotlin respectively. It also contains the remote verifier user interface and backend. Finally it contains a webserver for serving the CRL of the custom Certificate Authority under which the issuer and verifier certificates are issued. This custom CA's root certificate must be compiled into and packaged with the app, which requires a patch and build. Here is [guidance for the Android version of the reference implementation wallet app](#how-to-add-a-custom-root-certificate-to-the-android-wallet-app).
+If you are not using a separate root certificate you should disable the CRL webserver in the above setup.
+
+The issuer and verifier services are accessed to a web proxy, haproxy, that manages the context roots. The context roots for every service is indicated in the above diagram starting with "/". Configuration files for the respective services are indicated started with "*".
+
+NOTE: the Kotlin-issuer uses Keycloak as an Identity Provider for the PID data, i.e. you need an account in the pid-users-realm. The default account of the reference implementation is 'tneal' with password 'password'.
+
+NOTE: The Python-issuer uses the verifier backend when using PID authentication before issuing specific attestation (such as Age Verification attestation).
 
 ## How to build Python issuer and Verifier UI containers
 
@@ -87,8 +95,8 @@ The Python issuer is not yet available as a Docker container, so we build one ou
 2. Apply the patches:
     ```
     cd <cloned-repo>
-    patch -p1 < <py-issuer>/patches/route_oidc.py
-    patch -p1 < <py-issuer>/patches/route_oid4vp.py
+    patch -p1 < <py-issuer>/patch/route_oidc.py.patch
+    patch -p1 < <py-issuer>/patch/route_oid4vp.py.patch
     ```
 2. Build the container:
     ```
@@ -107,14 +115,16 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     ```
 3. Build the container:
     ```
-    cd <cloned-repo>
     docker build -t verifier-ui .
     ```
 
-## How to configure and run
+## How to configure and run the services
 
- 1. Clone this repository
- 1. Obtain a free [ngrok](https://ngrok.com/) domain (account required).
+ 1. Clone this [repository](https://github.com/potential-nl-blsp/eudi-poc-nl).
+     ```
+     git clone https://github.com/potential-nl-blsp/eudi-poc-nl
+     ```
+ 2. Obtain a free [ngrok](https://ngrok.com/) domain (account required).
  3. Replace all occurrences of `{NGROK_DOMAIN}` with your own domain in the following files:
     - ngrok/ngrok.yml
     - haproxy/haproxy.conf
@@ -124,31 +134,63 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - py-issuer/config/app_config/oid_config.json
     - py-issuer/config/metadata_config/metadata_config.json
     - py-issuer/config/metadata_config/openid-configuration.json
+    - cert/root.cnf (if using a self-managed CA)
+    - cert/kt-issuer.cnf (if (re-)generating a self-managed Kotlin issuer certificate)
+    - cert/verifier.cnf (if (re-)generating a self-managed verifier certificate)
    You can use the command
     ```
-    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json
+    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root/cnf cert/kt-issuer.cnf cert/verifier.cnf
     ```
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:
-    - root certificate (if using an own root certificate; if so make sure the root certificate is included in the wallet build)
+    - root certificate (if using an own root certificate; if so [make sure the root certificate is included in the wallet build](#how-to-add-a-custom-root-certificate-to-the-android-wallet-app))
     - issuer certificate (one separate for each issuer, if so desired), issued by the CA
     - verifier certificate, issued by the CA
-6. Set the passwords for the keystores and the private keys in `docker-compose.yaml`, i.e. the following environment variables:
-    - pid-issuer (Kotlin issuer):
-        - ISSUER_SIGNING_KEY_KEYSTORE_PASSWORD
-        - ISSUER_SIGNING_KEY_PASSWORD
-    - verifier (verifier backend):
-        - VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD
-        - VERIFIER_JAR_SIGNING_KEY_PASSWORD
-7. For the Python issuer:
-    - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
-    - in py-issuer/config add a directory keys and put there the private key and certifcate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
-8. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [section below on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
-9. If you are not using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
-10. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
-11. Access your services using https, at your Ngrok domain with context root:
+6. Configure the certificates and private keys for the issuers and verifier.
+    1. Create the keys and certificates, see [these instructions](cert/CERTIFICATES.md) for one way to do this.
+    2. Configure the keystores in `docker-compose.yaml`, i.e. mapping the keystore files to the container in the 'volumes' sections of
+        - pid-issuer (Kotlin issuer)
+           ```
+           volumes:
+           - {Kotlin_issuer_keystore_file_name}:/kt-issuer.p12:ro
+           ```
+        - 'verifier' (verifier backend)
+            ```
+            volumes:
+            - {verifier_keystore_file_name}:/verifier.p12:ro
+            ```
+    3. Set the passwords for the keystores and the private keys in `docker-compose.yaml`, i.e. the following environment variables:
+        - pid-issuer (Kotlin issuer):
+            - ISSUER_SIGNING_KEY_KEYSTORE_PASSWORD
+            - ISSUER_SIGNING_KEY_PASSWORD
+        - verifier (verifier backend):
+            - VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD
+            - VERIFIER_JAR_SIGNING_KEY_PASSWORD
+    4. For the Python issuer:
+        - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
+        - in py-issuer/config add a directory keys and put there the private key and certificate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
+7. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [the section on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
+8. Configure the {CRL_LOCATION} in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
+If you are NOT using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
+9. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
+10. Access your services using https, at your Ngrok domain with context root:
     - /verifier for the verifier,
     - /pid-issuer for the Kotlin issuer,
     - / for the Python issuer.
 
-    The API for the Verifier is available at context roots /ui and /wallet. See also the above diagram.
+    The API for the verifier is available at context roots /ui and /wallet. See also the above diagram.
+
+## How to add a custom root certificate to the Android wallet app
+To add a custom root certificate to the Android wallet app you need to:
+
+1. Clone the [repository](https://github.com/eu-digital-identity-wallet/eudi-app-android-wallet-ui):
+    ```
+    git clone https://github.com/eu-digital-identity-wallet/eudi-app-android-wallet-ui
+    ```
+2. Set up an Android build environment accoring the the instructions.
+3. Add the root certificate(s) you want as additional trust anchors to `resources-logic/src/main/res/raw`, as PEM-encoded file(s) with only alphanumeric characters plus _ in the file name, file name ending in .pem.
+3. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95:
+    ```
+    .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut))
+    ```
+4. Build the wallet app, using `gradlew app:packageDevRelease`.

@@ -4,7 +4,8 @@ This repository contains configuration to deploy the [EUDI Reference Wallet infr
 
 The configuration in this repository is based on that of the official EUDI Reference Wallet repositories.
 
-*The configuration in this repository is NOT suited for use in an production environment.*
+*NOTE: The configuration in this repository is NOT suited for use in an production environment.*
+*NOTE: This repository may not be maintained as the EUDI Reference Implementation matures.*
 
 The following diagram gives an overview of the setup.
 
@@ -75,17 +76,22 @@ classDiagram
     haproxy -- verifier-backend
     verifier-ui --> verifier-backend
     py-issuer --> verifier-backend
-
-
 ```
+
 ## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
-The Python issuer is not yet available as a Docker container, so we build one ourselves.
+The Python issuer is not yet available as a Docker container, so we build one ourselves. Additionally, the issuer cannot yet be configured to use a self-deployed verifier backend, so we need to apply some patches. These patches can be omitted once [issue #42](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/42) and [issue #44](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/44) have been resolved.
+
 1. Clone the original [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py).
-2. Build the container:
+2. Apply the patches:
     ```
     cd <cloned-repo>
+    patch -p1 < <py-issuer>/patches/route_oidc.py
+    patch -p1 < <py-issuer>/patches/route_oid4vp.py
+    ```
+2. Build the container:
+    ```
     cp <py-issuer>/Dockerfile .
     docker build -t py-issuer .
     ```

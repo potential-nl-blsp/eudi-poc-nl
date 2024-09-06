@@ -88,6 +88,8 @@ NOTE: the Kotlin-issuer uses Keycloak as an Identity Provider for the PID data, 
 
 NOTE: The Python-issuer uses the verifier backend when using PID authentication before issuing specific attestation (such as Age Verification attestation).
 
+**_NOTE: these instructions focus on deployment with "proper" certificates for issuers and verifier, i.e. not with self-signed certificates. The issuers and verifier certificates can be under a self-managed CA (instructions provided), or an external CA. In both cases, the certificate of the CA must be included as a trust anchor for the wallet app and the Python issuer (instructions provided)._**
+
 ## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
@@ -146,7 +148,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:
     - root certificate (if using an own root certificate; if so [make sure the root certificate is included in the wallet build](#how-to-add-a-custom-root-certificate-to-the-android-wallet-app))
-    - issuer certificate (one separate for each issuer, if so desired), issued by the CA
+    - issuer certificate (one separate for each issuer, if so desired), issued by a self-managed or external CA
     - verifier certificate, issued by the CA
 6. Configure the certificates and private keys for the issuers and verifier.
     1. Create the keys and certificates, see [these instructions](cert/CERTIFICATES.md) for one way to do this.

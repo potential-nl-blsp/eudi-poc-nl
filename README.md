@@ -82,6 +82,8 @@ If you are not using a separate root certificate you should disable the CRL webs
 
 The issuer and verifier services are accessed to a web proxy, haproxy, that manages the context roots. The context roots for every service is indicated in the above diagram starting with "/". Configuration files for the respective services are indicated started with "*".
 
+The setup is made accessible over HTTPS with an Let' Encrypt TLS-certificate using Ngrok, under your own Ngrok-domain.
+
 NOTE: the Kotlin-issuer uses Keycloak as an Identity Provider for the PID data, i.e. you need an account in the pid-users-realm. The default account of the reference implementation is 'tneal' with password 'password'.
 
 NOTE: The Python-issuer uses the verifier backend when using PID authentication before issuing specific attestation (such as Age Verification attestation).

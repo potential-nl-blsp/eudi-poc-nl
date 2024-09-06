@@ -191,8 +191,8 @@ To add a custom root certificate to the Android wallet app you need to:
     ```
 2. Set up an Android build environment accoring the the instructions.
 3. Add the root certificate(s) you want as additional trust anchors to `resources-logic/src/main/res/raw`, as PEM-encoded file(s) with only alphanumeric characters plus _ in the file name, file name ending in .pem.
-3. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95:
+3. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95 (note without the .pem extension):
     ```
-    .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut))
+    .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut)
     ```
 4. Build the wallet app, using `gradlew app:packageDevRelease`.

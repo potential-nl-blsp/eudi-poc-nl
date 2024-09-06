@@ -1,0 +1,22 @@
+[req]
+distinguished_name = {NGROK_DOMAIN}
+req_extensions = v3_req
+prompt = no
+
+[{NGROK_DOMAIN}]
+C = NL
+O = BLSP
+CN = kt-issuer
+
+[v3_req]
+#basicConstraints= critical, CA:false
+#subjectKeyIdentifier = hash
+#authorityKeyIdentifier = keyid:always,issuer
+keyUsage = critical, digitalSignature
+extendedKeyUsage = 1.0.18013.5.1.6
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = {NGROK_DOMAIN}
+DNS.2 = wallet-dev
+DNS.3 = localhost
+DNS.4 = kt-issuer

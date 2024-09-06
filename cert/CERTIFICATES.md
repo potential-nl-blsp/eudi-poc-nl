@@ -12,6 +12,7 @@ mkdir ca crl
 ```
 
 ### Generate root CA key and certificate
+If you want to use a self-managed root certificate, then follow the instructions directly below. If you use an external CA, then skip this section, and instead of following the instructions for [creating a certificate](#generate-verifier-or-issuer-certificate-as-the-ca) send the certificate service request to the external CA as per established procedure.
 ```
 openssl ecparam -name secp384r1 -genkey -noout -out ca/root-ca.key
 openssl ec -aes256 -in ca/root-ca.key -out ca/root-ca_encrypted.key
@@ -30,6 +31,11 @@ openssl req -key verifier_encrypted.key -out verifier.csr -config cert/verifier.
 NOTE: the EUDIW has requirements on certificate validity
 ```
 openssl ca -config cert/root.cnf -extensions v3_req -key ca/root-ca_encrypted.key -cert ca/root-ca.crt -days 360 -in verifier.csr -out verifier.crt
+```
+
+### Convert cerficate to DER-encoding (needed for Python issuer)
+```
+openssl x509 -in py-issert.crt -outform der -out py-issuer.der
 ```
 
 ### Package verifier or issuer certifcate as PKCS12 archive

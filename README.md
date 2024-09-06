@@ -141,7 +141,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - cert/verifier.cnf (if (re-)generating a self-managed verifier certificate)
    You can use the command
     ```
-    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root/cnf cert/kt-issuer.cnf cert/verifier.cnf
+    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root.cnf cert/kt-issuer.cnf cert/verifier.cnf
     ```
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:
@@ -172,7 +172,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
         - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
         - in py-issuer/config add a directory keys and put there the private key and certificate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
 7. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [the section on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
-8. Configure the {CRL_LOCATION} in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
+8. Configure the `{CRL_LOCATION}` in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
 If you are NOT using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
 9. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
 10. Access your services using https, at your Ngrok domain with context root:
@@ -195,4 +195,4 @@ To add a custom root certificate to the Android wallet app you need to:
     ```
     .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut)
     ```
-4. Build the wallet app, using `gradlew app:packageDevRelease`.
+4. Build the wallet app, using `gradlew app:packageDevRelease`. (Change steps 3 and 4 accordingly if you are doing the demo build.)

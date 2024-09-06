@@ -17,7 +17,7 @@ services:
     volumes:
       - ./py-issuer/config/app_config/:/opt/py-issuer/app/app_config/
       - ./py-issuer/config/metadata_config/:/opt/py-issuer/app/metadata_config/
-      - ./py-issuer/config/cert/:/opt/py-issuer/cert/
+      - ./py-issuer/config/trusted_cas/:/opt/py-issuer/trusted_cas/
       - ./py-issuer/config/keys/:/opt/py-issuer/keys/
       - ./py-issuer/logs/:/var/log/py-issuer/:rw
     networks:

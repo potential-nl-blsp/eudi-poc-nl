@@ -1,12 +1,16 @@
 ## Introduction
 
-This repository contains configuration to deploy the [EUDI Reference Wallet infrastructure](https://github.com/orgs/eu-digital-identity-wallet/repositories?type=all), i.e. the issuers and the verifier, in a fully containerised environment (based on [Docker](https://docs.docker.com/)). All access is with HTTPS, using [ngrok](https://ngrok.com/). This setup is prepared to use a separate trusted root CA (IACA) from the EUDI Reference Implementation. The purpose is to run all components on one server, and expose the interfaces over the Internet for demonstration and testing.
+This repository contains configuration to deploy the [EUDI Reference Wallet infrastructure](https://github.com/orgs/eu-digital-identity-wallet/repositories?type=all), i.e. the issuers and the verifier, in a fully containerised environment (based on [Docker](https://docs.docker.com/)). It is intended for demonstration and testing purposes only.
+All access is with HTTPS, using [ngrok](https://ngrok.com/). This setup is prepared to use a separate trusted root CA (IACA) from the EUDI Reference Implementation. The purpose is to run all components on one server.
 
 The configuration in this repository is based on that of the official EUDI Reference Wallet repositories.
 
-*NOTE: The configuration in this repository is NOT suited for use in an production environment.*
-*NOTE: This repository may not be maintained as the EUDI Reference Implementation matures.*
+### Disclaimers
+**_NOTE: The configuration in this repository is NOT suited for use in an production environment._**
 
+**_NOTE: This repository will probably not be maintained as the EUDI Reference Implementation matures._**
+
+### Schematic overview
 The following diagram gives an overview of the setup.
 
 ```mermaid
@@ -170,14 +174,20 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
         - verifier (verifier backend):
             - VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD
             - VERIFIER_JAR_SIGNING_KEY_PASSWORD
-    4. For the Python issuer:
+    4. Configure the names of the keystore entries in `docker-compose.yaml`, if they differ from the defaults:
+        - pid-issuer (Kotlin issuer):
+            - ISSUER_SIGNING_KEY_ALIAS (default: signingKey)
+        - verifier (verifier backend):
+            - VERIFIER_JAR_SIGNING_KEY_ALIAS (default: "verifier")
+    5. For the Python issuer:
         - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
         - in py-issuer/config add a directory keys and put there the private key and certificate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
 7. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [the section on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
 8. Configure the `{CRL_LOCATION}` in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
 If you are NOT using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
-9. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
-10. Access your services using https, at your Ngrok domain with context root:
+9. Optionally set various configuration parameters in `docker-compose.yaml` and `py-issuer/config/*` such as issuing authority and country, and add your own credentials to issue.
+10. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
+11. Access your services using https, at your Ngrok domain with context root:
     - /verifier for the verifier,
     - /pid-issuer for the Kotlin issuer,
     - / for the Python issuer.

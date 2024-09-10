@@ -273,13 +273,6 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "org.iso.23220.2.photoid.1",
-        },
-        "eu.europa.ec.eudi.nl.pensioenoverzicht.1": {
-            "issuing_authority": "BLSP NL",
-            "organization_id": "BLSP NL",
-            "validity": 365,
-            "organization_name": "BLSP NL",
-            "namespace": "eu.europa.ec.eudi.nl.pensioenoverzicht.1",
         }
     }
 
@@ -290,7 +283,6 @@ class ConfService:
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
-            "eu.europa.ec.eudi.nl.pensioenoverzicht",
             "eu.europa.ec.eudi.mdl_jwt_vc_json",
             "eu.europa.ec.eudi.mdl_mdoc",
             "eu.europa.ec.eudi.pid_jwt_vc_json",

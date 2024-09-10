@@ -46,7 +46,7 @@ classDiagram
     
     class py-issuer["Issuer in Python"] { 
         /
-        *py-issuer/config/app_metadata/
+        *py-issuer/config/app_config/
         *py-issuer/config/metadata_config/
         *py-issuer/config/keys/
         *py-issuer/config/trusted_cas/

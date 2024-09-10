@@ -1,0 +1,33 @@
+{
+  "type": "vp_token",
+  "presentation_definition": {
+    "id": "4cc517a9-fdf2-448f-8771-1c7b08ac7db0",
+    "input_descriptors": [
+      {
+        "id": "eu.europa.ec.eudi.nl.pensioenoverzicht.1",
+        "name": "AOW bedrag",
+        "purpose": "We need to verify your identity",
+        "format": {
+          "mso_mdoc": {
+            "alg": [
+              "ES256",
+              "ES384",
+              "ES512"
+            ]
+          }
+        },
+        "constraints": {
+          "fields": [
+            {
+              "path": [
+                "$['eu.europa.ec.eudi.nl.pensioenoverzicht.1']['aow-maandelijks']"
+              ],
+              "intent_to_retain": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "nonce": "1c815fc0-5385-44f0-acc7-5cdf0134e463"
+}

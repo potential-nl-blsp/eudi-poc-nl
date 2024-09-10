@@ -6,9 +6,8 @@ All access is with HTTPS, using [ngrok](https://ngrok.com/). This setup is prepa
 The configuration in this repository is based on that of the official EUDI Reference Wallet repositories.
 
 ### Disclaimers
-**_NOTE: The configuration in this repository is NOT suited for use in an production environment._**
-
-**_NOTE: This repository will probably not be maintained as the EUDI Reference Implementation matures._**
+* _The configuration in this repository is NOT suited for use in an production environment. The configuration is provided "AS IS", without specific support._
+* _This repository will probably not be maintained as the EUDI Reference Implementation matures._
 
 ### Schematic overview
 The following diagram gives an overview of the setup.

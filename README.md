@@ -96,7 +96,10 @@ NOTE: The Python-issuer uses the verifier backend when using PID authentication 
 ## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
-The Python issuer is not yet available as a Docker container, so we build one ourselves. Additionally, the issuer cannot yet be configured to use a self-deployed verifier backend, so we need to apply some patches. These patches can be omitted once [issue #42](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/42) and [issue #44](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/44) have been resolved.
+The Python issuer is not yet available as a Docker container, so we build one ourselves. 
+
+##### Work-arounds for open issues
+Additionally, the issuer cannot yet be configured to use a self-deployed verifier backend, so we need to apply some patches. These patches can be omitted once [issue #42](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/42), [issue #44](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/44), and [issue #48](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/48) have been resolved.
 
 1. Clone the original [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py).
 2. Apply the patches:
@@ -208,4 +211,5 @@ To add a custom root certificate to the Android wallet app you need to:
     .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut)
     ```
 5. Optionally set the URL's for wallet initiated issuance of specific attestations to the URL of your own issuer in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`.
-6. Build the wallet app, using `gradlew app:packageDevRelease`. (Change steps 3 to 5 accordingly if you are doing the demo build.)
+6. Recommended: set a unique build version number (version.properties) so that you can verify you are running the app version that you think you are running.
+7. Build the wallet app, using `gradlew app:packageDevRelease`. (Change steps 3 to 5 accordingly if you are doing the demo build.)

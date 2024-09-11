@@ -153,7 +153,7 @@ services:
       - kt-issuer
 
   verifier:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.4
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.5
     container_name: verifier-backend
     environment:
       VERIFIER_PUBLICURL: "https://{NGROK_DOMAIN}"

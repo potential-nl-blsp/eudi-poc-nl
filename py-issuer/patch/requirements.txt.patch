@@ -1,0 +1,13 @@
+diff --git a/app/requirements.txt b/app/requirements.txt
+index d054283..b9a332d 100644
+--- a/app/requirements.txt
++++ b/app/requirements.txt
+@@ -26,5 +26,5 @@ git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
+ git+https://github.com/eu-digital-identity-wallet/idpy-oidc.git
+ git+https://github.com/eu-digital-identity-wallet/openid4v.git
+ git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@9181a0a4514b7de2cc30a84d320b509e9fc5cb59
+-git+https://github.com/rohe/fedservice.git
+-git+https://github.com/rohe/idpy-sdjwt.git
+\ No newline at end of file
++git+https://github.com/rohe/fedservice.git@a6a2e1a
++git+https://github.com/rohe/idpy-sdjwt.git

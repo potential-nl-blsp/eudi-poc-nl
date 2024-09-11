@@ -104,6 +104,7 @@ The Python issuer is not yet available as a Docker container, so we build one ou
     cd <cloned-repo>
     patch -p1 < <py-issuer>/patch/route_oidc.py.patch
     patch -p1 < <py-issuer>/patch/route_oid4vp.py.patch
+    patch -p1 < <py-issuer>/patch/requirements.txt.patch
     ```
 2. Build the container:
     ```
@@ -185,7 +186,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 8. Configure the `{CRL_LOCATION}` in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
 If you are NOT using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
 9. Optionally set various configuration parameters in `docker-compose.yaml` and `py-issuer/config/*` such as issuing authority and country, and add your own credentials to issue.
-10. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 7 running containers. Stop services with `docker compose down`.
+10. Start the services using `docker compose up -d`. Verify that all containers are running using `docker ps`; it should list 8 running containers. Stop services with `docker compose down`.
 11. Access your services using https, at your Ngrok domain with context root:
     - /verifier for the verifier,
     - /pid-issuer for the Kotlin issuer,
@@ -200,10 +201,11 @@ To add a custom root certificate to the Android wallet app you need to:
     ```
     git clone https://github.com/eu-digital-identity-wallet/eudi-app-android-wallet-ui
     ```
-2. Set up an Android build environment accoring the the instructions.
+2. Set up an Android build environment according the the instructions.
 3. Add the root certificate(s) you want as additional trust anchors to `resources-logic/src/main/res/raw`, as PEM-encoded file(s) with only alphanumeric characters plus _ in the file name, file name ending in .pem.
-3. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95 (note without the .pem extension):
+4. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95 (note without the .pem extension):
     ```
     .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut)
     ```
-4. Build the wallet app, using `gradlew app:packageDevRelease`. (Change steps 3 and 4 accordingly if you are doing the demo build.)
+5. Optionally set the URL's for wallet initiated issuance of specific attestations to the URL of your own issuer in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`.
+6. Build the wallet app, using `gradlew app:packageDevRelease`. (Change steps 3 to 5 accordingly if you are doing the demo build.)

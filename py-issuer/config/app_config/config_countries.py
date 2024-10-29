@@ -34,9 +34,9 @@ class ConfCountries:
         formCountry: {
             "name": "FormEU",
             "pid_url": cfgserv.service_url + "pid/form",
-            "pid_mdoc_privkey": "/opt/py-issuer/keys/py-issuer.key",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/keys/py-issuer.key",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": "/opt/py-issuer/keys/py-issuer.der",
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/py-issuer.der",
             "un_distinguishing_sign": "FC",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -46,8 +46,14 @@ class ConfCountries:
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
                 "eu.europa.ec.eudi.pseudonym_over18_mdoc",
-                "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
+                "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+                "eu.europa.ec.eudi.photoid",
+                "eu.europa.ec.eudi.por_mdoc",
+                "eu.europa.ec.eudi.iban_mdoc",
+                "eu.europa.ec.eudi.hiid_mdoc",
+                "eu.europa.ec.eudi.tax_mdoc",
+                "eu.europa.ec.eudi.msisdn_mdoc",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
-        },
+        }
     }

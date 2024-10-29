@@ -10,16 +10,19 @@ networks:
 
 services:
   py-issuer:
-    image: py-issuer:latest
+    image: py-issuer:latest # build image yourself, there is no published image
     container_name: py-issuer
     environment:
-      - FLASK_DEBUG=1
+      - SERVICE_URL=https://{NGROK_DOMAIN}/
+#      - EIDAS_NODE_URL=https://your.eidas.node.url/
+      - DYNAMIC_PRESENTATION_URL=https://{NGROK_DOMAIN}/ui/presentations/
     volumes:
-      - ./py-issuer/config/app_config/:/opt/py-issuer/app/app_config/
-      - ./py-issuer/config/metadata_config/:/opt/py-issuer/app/metadata_config/
-      - ./py-issuer/config/trusted_cas/:/opt/py-issuer/trusted_cas/
-      - ./py-issuer/config/keys/:/opt/py-issuer/keys/
-      - ./py-issuer/logs/:/var/log/py-issuer/:rw
+      - ./py-issuer/config/secrets/:/root/secrets/:ro
+      - ./py-issuer/config/cert/:/etc/eudiw/pid-issuer/cert/:ro
+      - ./py-issuer/config/keys/:/etc/eudiw/pid-issuer/keys/:ro
+      - ./py-issuer/config/app_config/:/root/eudi-srv-web-issuing-eudiw-py/app/app_config/:rw
+      - ./py-issuer/config/metadata_config/:/root/eudi-srv-web-issuing-eudiw-py/app/metadata_config/:ro
+      - ./py-issuer/logs/:/tmp/log_dev/:rw
     networks:
       - py-issuer
 
@@ -99,7 +102,7 @@ services:
       - kt-issuer
 
   pid-issuer:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-pid-issuer:latest
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-pid-issuer:v0.2.4
     pull_policy: always
     container_name: pid-issuer
     depends_on:
@@ -153,7 +156,7 @@ services:
       - kt-issuer
 
   verifier:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.5
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.6
     container_name: verifier-backend
     environment:
       VERIFIER_PUBLICURL: "https://{NGROK_DOMAIN}"
@@ -180,6 +183,7 @@ services:
 
   verifier-ui:
     image: verifier-ui:latest
+    #image: ghcr.io/eu-digital-identity-wallet/eudi-web-verifier:v0.5.1
     container_name: verifier-ui
     environment:
       - DOMAIN_NAME="{NGROK_DOMAIN}"

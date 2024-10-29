@@ -9,6 +9,20 @@ The configuration in this repository is based on that of the official EUDI Refer
 * _The configuration in this repository is NOT suited for use in an production environment. The configuration is provided "AS IS", without specific support._
 * _This repository will probably not be maintained as the EUDI Reference Implementation matures._
 
+### Actuality (October 2024)
+> The configuration in this repository is for the following versions of the EUDI Reference Implementation:
+> 
+> _Verifier_
+> - eu-digital-identity-wallet/eudi-web-verifier:**v0.5.1**
+> - eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:**v0.1.6**
+>
+> _Issuer (Python)_
+> - eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:**0.6.0**
+>
+> _Issuer (Kotlin)_
+> - eu-digital-identity-wallet/eudi-srv-pid-issuer:**v0.2.4**
+
+
 ### Schematic overview
 The following diagram gives an overview of the setup.
 
@@ -49,7 +63,7 @@ classDiagram
         *py-issuer/config/app_config/
         *py-issuer/config/metadata_config/
         *py-issuer/config/keys/
-        *py-issuer/config/trusted_cas/
+        *py-issuer/config/cert/
     }
     
     class pid-issuer["Issuer in Kotlin"] {
@@ -85,7 +99,7 @@ If you are not using a separate root certificate you should disable the CRL webs
 
 The issuer and verifier services are accessed to a web proxy, haproxy, that manages the context roots. The context roots for every service is indicated in the above diagram starting with "/". Configuration files for the respective services are indicated started with "*".
 
-The setup is made accessible over HTTPS with an Let' Encrypt TLS-certificate using Ngrok, under your own Ngrok-domain.
+The setup is made accessible over HTTPS with an Let's Encrypt TLS-certificate using Ngrok, under your own Ngrok-domain.
 
 NOTE: the Kotlin-issuer uses Keycloak as an Identity Provider for the PID data, i.e. you need an account in the pid-users-realm. The default account of the reference implementation is 'tneal' with password 'password'.
 
@@ -96,22 +110,13 @@ NOTE: The Python-issuer uses the verifier backend when using PID authentication 
 ## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
-The Python issuer is not yet available as a Docker container, so we build one ourselves. 
-
-##### Work-arounds for open issues
-Additionally, the issuer cannot yet be configured to use a self-deployed verifier backend, so we need to apply some patches. These patches can be omitted once [issue #42](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/42), [issue #44](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/44), and [issue #48](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/issues/48) have been resolved.
+The Python issuer is not yet published as a Docker container, so we build one ourselves. 
 
 1. Clone the original [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py).
-2. Apply the patches:
-    ```
-    cd <cloned-repo>
-    patch -p1 < <py-issuer>/patch/route_oidc.py.patch
-    patch -p1 < <py-issuer>/patch/route_oid4vp.py.patch
-    patch -p1 < <py-issuer>/patch/requirements.txt.patch
-    ```
 2. Build the container:
     ```
-    cp <py-issuer>/Dockerfile .
+    git checkout 0.6.0
+    patch -p1 < <py-issuer>/patch/Dockerfile
     docker build -t py-issuer .
     ```
 
@@ -122,6 +127,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
     cd <cloned-repo>
+    git checkout v0.5.1
     patch -p1 < <verifier-ui>/package.json.patch
     ```
 3. Build the container:
@@ -183,7 +189,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
         - verifier (verifier backend):
             - VERIFIER_JAR_SIGNING_KEY_ALIAS (default: "verifier")
     5. For the Python issuer:
-        - in py-issuer/config/trusted_cas add the root certificates (PEM-encoded with file extension .pem) of additional CAs
+        - in py-issuer/config/cert add the root certificates (PEM-encoded with file extension .pem) of additional CAs
         - in py-issuer/config add a directory keys and put there the private key and certificate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
 7. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [the section on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
 8. Configure the `{CRL_LOCATION}` in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.

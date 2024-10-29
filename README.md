@@ -110,13 +110,17 @@ NOTE: The Python-issuer uses the verifier backend when using PID authentication 
 ## How to build Python issuer and Verifier UI containers
 
 ### Python issuer
-The Python issuer is not yet published as a Docker container, so we build one ourselves. 
+The Python issuer is not yet published as a Docker container, so we build one ourselves. We appliy a minor patch not to use internal TLS between haproxy and the issuer services. 
 
 1. Clone the original [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py).
-2. Build the container:
+2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
+    cd <cloned-repo>
     git checkout 0.6.0
-    patch -p1 < <py-issuer>/patch/Dockerfile
+    patch -p1 < <py-issuer>/patch/Dockerfile.patch
+    ```
+3. Build the container:
+    ```
     docker build -t py-issuer .
     ```
 
@@ -156,7 +160,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - cert/verifier.cnf (if (re-)generating a self-managed verifier certificate)
    You can use the command
     ```
-    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/app_config/oid_config.json py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root.cnf cert/kt-issuer.cnf cert/verifier.cnf
+    perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root.cnf cert/kt-issuer.cnf cert/verifier.cnf
     ```
 4. In ngrok/ngrok.yml replace `{AUTH_TOKEN}` with your ngrok authentication token.
 5. Generate and configure the following certificates:

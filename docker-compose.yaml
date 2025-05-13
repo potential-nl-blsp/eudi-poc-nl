@@ -148,7 +148,7 @@ services:
       - ISSUER_CREDENTIALENDPOINT_BATCHISSUANCE_BATCHSIZE=10
       - ISSUER_CNONCE_EXPIRATION=PT5M
     volumes:
-      - ./kt-issuer/config/kt-issuer.p12:kt-issuer.p12:ro
+      - ./kt-issuer/config/kt-issuer.p12:/kt-issuer.p12:ro
     networks:
       - kt-issuer
 

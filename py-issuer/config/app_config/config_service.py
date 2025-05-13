@@ -38,9 +38,9 @@ class ConfService:
     # service_url = "https://127.0.0.1:5000/"
     # service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
-    wallet_test_url = "https://{NGROK_DOMAIN}/"
+    wallet_test_url = "https://first-alpaca-mutually.ngrok-free.app/"
 
-    revocation_service_url = "https://{NGROK_DOMAIN}/token_status_list/take"
+    revocation_service_url = "https://first-alpaca-mutually.ngrok-free.app/token_status_list/take"
 
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"

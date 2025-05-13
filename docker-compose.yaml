@@ -194,6 +194,6 @@ services:
       - "8080:8080"
     volumes:
       - ./nginx/crl/:/var/www/ca/:ro
-      - ./nginx/:/etc/nginx/conf.d/:ro
+      - ./nginx/config/:/etc/nginx/conf.d/:ro
     networks:
       - verifier

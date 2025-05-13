@@ -28,6 +28,8 @@ from .config_service import ConfService as cfgserv
 
 
 class ConfCountries:
+    urlReturnEE = "https://pprpid.provider.eudiw.projj.eu/tara/redirect"
+
     formCountry = "FC"
     # supported countries
     supported_countries = {
@@ -41,7 +43,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
@@ -53,7 +54,17 @@ class ConfCountries:
                 "eu.europa.ec.eudi.hiid_mdoc",
                 "eu.europa.ec.eudi.tax_mdoc",
                 "eu.europa.ec.eudi.msisdn_mdoc",
+                "eu.europa.ec.eudi.pda1_mdoc",
+                "eu.europa.ec.eudi.tax_sd_jwt_vc",
+                "eu.europa.ec.eudi.por_sd_jwt_vc",
+                "eu.europa.ec.eudi.msisdn_sd_jwt_vc",
+                "eu.europa.ec.eudi.hiid_sd_jwt_vc",
+                "eu.europa.ec.eudi.iban_sd_jwt_vc",
+                "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
+                "eu.europa.ec.eudi.ehic_mdoc",
+                "eu.europa.ec.eudi.ehic_sd_jwt_vc",
+                "eu.europa.ec.eudi.pda1_sd_jwt_vc"
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
-        }
+        },
     }

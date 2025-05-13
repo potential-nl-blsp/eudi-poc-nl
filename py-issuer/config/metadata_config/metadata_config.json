@@ -4,6 +4,16 @@
   "batch_credential_endpoint": "https://{NGROK_DOMAIN}/batch_credential",
   "notification_endpoint": "https://{NGROK_DOMAIN}/notification",
   "deferred_credential_endpoint": "https://{NGROK_DOMAIN}/deferred_credential",
+  "display": [
+    {
+    "name": "Digital Credentials Issuer",
+    "locale": "en",
+    "logo": {
+        "uri": "https://issuer.eudiw.dev/ic-logo.png",
+        "alt_text": "EU Digital Identity Wallet Logo"
+    }
+    }
+  ],
   "credential_configurations_supported": {
     
 

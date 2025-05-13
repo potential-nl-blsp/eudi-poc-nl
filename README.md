@@ -9,18 +9,21 @@ The configuration in this repository is based on that of the official EUDI Refer
 * _The configuration in this repository is NOT suited for use in an production environment. The configuration is provided "AS IS", without specific support._
 * _This repository will probably not be maintained as the EUDI Reference Implementation matures._
 
-### Actuality (October 2024)
+### Actuality (May 2025)
 > The configuration in this repository is for the following versions of the EUDI Reference Implementation:
 > 
 > _Verifier_
-> - eu-digital-identity-wallet/eudi-web-verifier:**v0.5.1**
-> - eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:**v0.1.6**
+> - eu-digital-identity-wallet/eudi-web-verifier:**v0.7.0**
+> - eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:**v0.4.0**
 >
 > _Issuer (Python)_
-> - eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:**0.6.0**
+> - eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:**0.7.2**
 >
 > _Issuer (Kotlin)_
-> - eu-digital-identity-wallet/eudi-srv-pid-issuer:**v0.2.4**
+> - eu-digital-identity-wallet/eudi-srv-pid-issuer:**v0.3.5**
+>
+> _Wallet (Android)
+> - eu-digital-identity-wallet/eudi-app-android-wallet-ui:**Wallet/Demo_Version=2025.04.25-Demo_Build=25**
 
 
 ### Schematic overview
@@ -56,6 +59,7 @@ classDiagram
     class verifier-backend {
         /ui
         /wallet
+        *verifier/config
     }
     
     class py-issuer["Issuer in Python"] { 
@@ -116,7 +120,7 @@ The Python issuer is not yet published as a Docker container, so we build one ou
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
     cd <cloned-repo>
-    git checkout 0.6.0
+    git checkout 0.7.2
     patch -p1 < <py-issuer>/patch/Dockerfile.patch
     ```
 3. Build the container:
@@ -131,7 +135,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
     cd <cloned-repo>
-    git checkout v0.5.1
+    git checkout v0.7.0
     patch -p1 < <verifier-ui>/package.json.patch
     ```
 3. Build the container:
@@ -158,6 +162,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     - cert/root.cnf (if using a self-managed CA)
     - cert/kt-issuer.cnf (if (re-)generating a self-managed Kotlin issuer certificate)
     - cert/verifier.cnf (if (re-)generating a self-managed verifier certificate)
+   
    You can use the command
     ```
     perl -p -i -e 's/{NGROK_DOMAIN}/your.ngrok.domain/gx' ngrok/ngrok.yml haproxy/haproxy.conf nginx/crl-server.conf docker-compose.yaml py-issuer/config/app_config/config_service.py py-issuer/config/metadata_config/metadata_config.json py-issuer/config/metadata_config/openid-configuration.json cert/root.cnf cert/kt-issuer.cnf cert/verifier.cnf
@@ -179,6 +184,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
             ```
             volumes:
             - {verifier_keystore_file_name}:/verifier.p12:ro
+            - {trusted_issuers_keystore_file_name}:/trusted-issuers.p12:ro
             ```
     3. Set the passwords for the keystores and the private keys in `docker-compose.yaml`, i.e. the following environment variables:
         - pid-issuer (Kotlin issuer):
@@ -187,6 +193,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
         - verifier (verifier backend):
             - VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD
             - VERIFIER_JAR_SIGNING_KEY_PASSWORD
+            - TRUSTEDTRUSTEDISSUERS_KEYSTORE_PASSWORD
     4. Configure the names of the keystore entries in `docker-compose.yaml`, if they differ from the defaults:
         - pid-issuer (Kotlin issuer):
             - ISSUER_SIGNING_KEY_ALIAS (default: signingKey)
@@ -195,6 +202,8 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
     5. For the Python issuer:
         - in py-issuer/config/cert add the root certificates (PEM-encoded with file extension .pem) of additional CAs
         - in py-issuer/config add a directory keys and put there the private key and certificate with which to sign attestations, named 'py-issuer.key' and 'py-issuer.der' respectively. The certificate must be DER-encoded.
+    6. For the verifier backend:
+        - in verifier/config/trusted-issuers.p12 add the PKCS12 archive containing the trusted certificates of trusted issuers. 
 7. Build containers for the Python issuer and the Verifier UI. This is needed because a Docker image is not available (Python issuer) or because more flexible configuration is needed (Verifier). See [the section on how to build these containers](#how-to-build-python-issuer-and-verifier-ui-container).
 8. Configure the `{CRL_LOCATION}` in `docker-compose.yaml` in the section for the crl service, if you are using an own root certificate.
 If you are NOT using an own root certificate, comment out the crl service section in `docker-compose.yaml`, and remove the nginx dependency of the haproxy service in that same file.
@@ -216,9 +225,9 @@ To add a custom root certificate to the Android wallet app you need to:
     ```
 2. Set up an Android build environment according the the instructions.
 3. Add the root certificate(s) you want as additional trust anchors to `resources-logic/src/main/res/raw`, as PEM-encoded file(s) with only alphanumeric characters plus _ in the file name, file name ending in .pem.
-4. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, line 95 (note without the .pem extension):
+4. Add the root cerificate file(s) to the method call in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`, (note without the .pem extension):
     ```
-    .trustedReaderCertificates(R.raw.my_root_certificate, R.raw.eudi_pid_issuer_ut)
+    .trustedReaderCertificates(context, R.raw.pidissuercaX, R.raw.pidissuercaY, ..., R.raw.my_root_certificate)
     ```
 5. Optionally set the URL's for wallet initiated issuance of specific attestations to the URL of your own issuer in `core-logic/src/dev/java/eu/europa/ec/corelogic/config/ConfigWalletCoreImpl.kt`.
 6. Recommended: set a unique build version number (version.properties) so that you can verify you are running the app version that you think you are running.

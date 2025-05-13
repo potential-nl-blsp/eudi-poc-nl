@@ -42,7 +42,7 @@
         "name": "Power Of Representation",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/por.png",
+          "uri": "https://examplestate.com/public/por.png",
           "alt_text": "A square figure of a PoR"
         }
       }
@@ -109,7 +109,56 @@
               "name": "Effective Until Date",
               "locale": "en"            }
           ]
-        }
+        },
+        "issuance_date": {
+            "mandatory": true,
+            "source":"issuer",
+            "display": [
+              {
+                "name": "Issuance Date",
+                "locale": "en"
+              }
+            ]
+          },
+          "expiry_date": {
+            "mandatory": true,
+            "source":"issuer",
+            "display": [
+              {
+                "name": "Expiry Date",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_authority": {
+            "mandatory": true,
+            "source":"issuer",
+            "display": [
+              {
+                "name": "Issuing Authority",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_jurisdiction": {
+            "mandatory": false,
+            "display": [
+              {
+                "name": "",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_country": {
+            "mandatory": true,
+            "source":"issuer",
+            "display": [
+              {
+                "name": "Issuing Country",
+                "locale": "en"
+              }
+            ]
+          }
       }
     }
   }

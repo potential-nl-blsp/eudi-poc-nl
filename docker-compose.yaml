@@ -44,7 +44,7 @@ services:
       - ingress
 
   haproxy:
-    image: haproxy:latest
+    image: haproxy:2.8.3
     container_name: haproxy
     ports:
       - "80:80"
@@ -64,45 +64,37 @@ services:
       - verifier
   
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0.3-0
+    image: quay.io/keycloak/keycloak:26.1.4-0
     container_name: keycloak
     command:
       - start-dev
       - --import-realm
-        #      - --features=dpop
+      - --features=dpop
     environment:
-      - KC_PROXY=edge
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HTTP_ENABLED=true
       - KC_HTTP_RELATIVE_PATH=/idp
-        #- KC_HOSTNAME={NGROK_DOMAIN}
-      - KC_HOSTNAME_URL=https://{NGROK_DOMAIN}/idp
-      - KC_HOSTNAME_ADMIN_URL=https://{NGROK_DOMAIN}/idp
-      - KC_HOSTNAME_STRICT=false
-      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HOSTNAME=https://{NGROK_DOMAIN}/idp
+      - KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
       - KC_HTTPS_CERTIFICATE_FILE=/etc/ssl/certs/keycloak.tls.crt
       - KC_HTTPS_CERTIFICATE_KEY_FILE=/etc/ssl/certs/keycloak.tls.key
-      - KC_HTTP_ENABLED=true
-      - KC_HEALTH_ENABLED=true
-      - KC_METRICS_ENABLED=true
-      - KC_SPI_THEME_STATIC_MAX_AGE=-1
-      - KC_SPI_THEME_CACHE_THEMES=false
-      - KC_SPI_THEME_CACHE_TEMPLATES=false
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=password
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=password
     healthcheck:
       test: "bash /opt/keycloak/health-check.sh"
       interval: 5s
       timeout: 10s
       retries: 12
+      start_interval: 30s
     volumes:
       - ./kt-issuer/keycloak/extra/health-check.sh:/opt/keycloak/health-check.sh
       - ./kt-issuer/keycloak/realms/:/opt/keycloak/data/import
-      - ./kt-issuer/keycloak/themes/:/opt/keycloak/themes
       - ./kt-issuer/keycloak/certs/:/etc/ssl/certs/
     networks:
       - kt-issuer
 
   pid-issuer:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-pid-issuer:v0.2.4
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-pid-issuer:v0.3.5
     pull_policy: always
     container_name: pid-issuer
     depends_on:
@@ -127,10 +119,11 @@ services:
       - ISSUER_PID_MSO_MDOC_ENCODER_DURATION=P30D
       - ISSUER_PID_MSO_MDOC_NOTIFICATIONS_ENABLED=true
       - ISSUER_PID_SD_JWT_VC_ENABLED=true
-      - ISSUER_PID_SD_JWT_VC_NOTUSEBEFORE=PT20
+      - ISSUER_PID_SD_JWT_VC_NOTUSEBEFORE=PT20S
       - ISSUER_PID_SD_JWT_VC_DEFERRED=true
       - ISSUER_PID_SD_JWT_VC_NOTIFICATIONS_ENABLED=true
       - ISSUER_PID_ISSUINGCOUNTRY=NL
+      - ISSUER_PID_ISSUINGJURISDICTION=NL-BLSP
       - ISSUER_MDL_ENABLED=true
       - ISSUER_MDL_MSO_MDOC_ENCODER_DURATION=P5D
       - ISSUER_MDL_NOTIFICATIONS_ENABLED=true
@@ -150,24 +143,23 @@ services:
       - ISSUER_DPOP_PROOF_MAX_AGE=PT1M
       - ISSUER_DPOP_CACHE_PURGE_INTERVAL=PT10M
       - ISSUER_DPOP_REALM=pid-issuer
+      - ISSUER_DPOP_NONCE_ENABLED=false
+      - ISSUER_CREDENTIALENDPOINT_BATCHISSUANCE_ENABLED=true
+      - ISSUER_CREDENTIALENDPOINT_BATCHISSUANCE_BATCHSIZE=10
+      - ISSUER_CNONCE_EXPIRATION=PT5M
     volumes:
       - {Kotlin_issuer_keystore_file_name}:/kt-issuer.p12:ro
     networks:
       - kt-issuer
 
   verifier:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.1.6
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.4.0
     container_name: verifier-backend
     environment:
       VERIFIER_PUBLICURL: "https://{NGROK_DOMAIN}"
       VERIFIER_RESPONSE_MODE: "DirectPostJwt"
-        #VERIFIER_RESPONSE_MODE: "DirectPost"
-        #VERIFIER_CLIENTID: "wallet-dev"
-        #VERIFIER_CLIENTIDSCHEME: "pre-registered"
-      VERIFIER_CLIENTID: "{NGROK_DOMAIN}"
-      #VERIFIER_CLIENTID: "Verifier"
+      VERIFIER_ORIGINALCLIENTID: "{NGROK_DOMAIN}"
       VERIFIER_CLIENTIDSCHEME: "x509_san_dns"
-        #      VERIFIER_JWK_EMBED: "ByValue"
       VERIFIER_JAR_SIGNING_ALGORITHM: "ES256"
       VERIFIER_JAR_SIGNING_KEY: "LoadFromKeystore"
       VERIFIER_JAR_SIGNING_KEY_KEYSTORE: "file:///verifier.p12"
@@ -175,9 +167,13 @@ services:
       VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD: ""
       VERIFIER_JAR_SIGNING_KEY_ALIAS: "verifier"
       VERIFIER_JAR_SIGNING_KEY_PASSWORD: ""
+      TRUSTEDISSUERS_KEYSTORE_PATH: "file:///trusted-issuers.p12"
+      TRUSTEDISSUERS_KEYSTORE_TYPE: PKCS12
+      TRUSTEDISSUERS_KEYSTORE_PASSWORD: ""
       TZ: "Europe/Amsterdam"
     volumes:
-      - {verifier_keystore_file_name}:/verifier.p12:ro
+      - /opt/eudiw/ca/verifier.p12:/verifier.p12:ro
+      - {verifier_keystore_file_name}:/trusted-issuers.p12
     networks:
       - verifier
 

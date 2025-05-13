@@ -1,0 +1,25 @@
+{
+    "issuer":
+        "https://{NGROK_DOMAIN}",
+    "authorization_endpoint":
+        "https://{NGROK_DOMAIN}/authorizationV3",
+    "token_endpoint":
+        "https://{NGROK_DOMAIN}/token",
+    "token_endpoint_auth_methods_supported": 
+        ["public"],
+    "token_endpoint_auth_signing_alg_values_supported":
+        ["ES256"],
+    "code_challenge_methods_supported": 
+        ["S256"],
+    "userinfo_endpoint": 
+        "https://{NGROK_DOMAIN}/userinfo",
+    "jwks_uri":
+        "https://{NGROK_DOMAIN}/static/jwks.json",
+    "registration_endpoint":
+        "https://{NGROK_DOMAIN}/registration",
+    "scopes_supported": [
+        "openid"],
+    "response_types_supported":
+      ["code"]
+
+}

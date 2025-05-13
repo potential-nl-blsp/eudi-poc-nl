@@ -5,21 +5,21 @@ Create a work directory to store the certificates, keys, config files and CRL.
 
 In the work directory:
 ```
+mkdir ca crl newcerts
 touch index.txt
 echo 1420 > serial
 echo 1001 > crl/crlnumber
-mkdir ca crl
 ```
 
 ### Generate root CA key and certificate
 If you want to use a self-managed root certificate, then follow the instructions directly below. If you use an external CA, then skip this section, and instead of following the instructions for [creating a certificate](#generate-verifier-or-issuer-certificate-as-the-ca) send the certificate service request to the external CA as per established procedure.
 
-Adapt `{ISSUER_URL}` in the configuration file `cert/root.cnf` to an appropriate values.
+Adapt `{ISSUER_URL}` in the configuration file `cert/root.cnf` to an appropriate value.
 
 ```
-openssl ecparam -name secp384r1 -genkey -noout -out ca/root-ca.key
+openssl ecparam -name prime356v1 -genkey -noout -out ca/root-ca.key
 openssl ec -aes256 -in ca/root-ca.key -out ca/root-ca_encrypted.key
-openssl req -config cert/root.cnf -new -x509 -key ca/root-ca.key -out ca/root-ca.crt -extensions v3_ca
+openssl req -config cert/root.cnf -new -x509 -key ca/root-ca.key -out ca/root-ca.crt -extensions v3_ca -sha384
 ```
 
 ### Generate verifier or issuer key and certificate request
@@ -38,7 +38,7 @@ openssl ca -config cert/root.cnf -extensions v3_req -key ca/root-ca_encrypted.ke
 
 ### Convert cerficate to DER-encoding (needed for Python issuer)
 ```
-openssl x509 -in py-issert.crt -outform der -out py-issuer.der
+openssl x509 -in py-issuer.crt -outform der -out py-issuer.der
 ```
 
 ### Package verifier or issuer certifcate as PKCS12 archive
@@ -47,6 +47,11 @@ Adapt the file names according to the role (issuer, verifier) for which you are 
 cat verifier.crt ca/root-ca.crt > verifier-chain.pem
 openssl pkcs12 -export -name verifier -inkey verifier_encrypted.key -in verifier.crt -certfile verifier-chain.pem -out verifier.p12 -passout pass:your_password
 chmod 644 verifier.p12
+```
+### Package trused issuers PKCS12 archive (for verifier)
+Collect all certificates of trusted issuers.
+```
+openssl pkcs12 -export -nokeys -in <issuer1.crt> -out trusted-issuers.p12 -passout pass:your_password
 ```
 
 ### Generate CRL

@@ -6,8 +6,8 @@ index f7c9693..631bb76 100644
    "scripts": {
      "ng": "ng",
      "start": "npm run config && ng serve --proxy-config src/proxy.conf.json",
--    "build": "npm run config && ng build --build-optimizer --configuration=production",
-+    "build": "npm run config && ng build --build-optimizer --configuration=production --base-href  ./ --deploy-url ./",
+-    "build": "npm run config && ng build --configuration=production",
++    "build": "npm run config && ng build --configuration=production --base-href  ./ --deploy-url ./",
      "watch": "npm run config && ng build --watch --configuration=development",
      "config": "node set-env.js",
      "test": "ng test",

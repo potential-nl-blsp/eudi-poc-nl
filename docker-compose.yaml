@@ -148,7 +148,7 @@ services:
       - ISSUER_CREDENTIALENDPOINT_BATCHISSUANCE_BATCHSIZE=10
       - ISSUER_CNONCE_EXPIRATION=PT5M
     volumes:
-      - {Kotlin_issuer_keystore_file_name}:/kt-issuer.p12:ro
+      - ./kt-issuer/config/kt-issuer.p12:kt-issuer.p12:ro
     networks:
       - kt-issuer
 
@@ -172,8 +172,8 @@ services:
       TRUSTEDISSUERS_KEYSTORE_PASSWORD: ""
       TZ: "Europe/Amsterdam"
     volumes:
-      - /opt/eudiw/ca/verifier.p12:/verifier.p12:ro
-      - {verifier_keystore_file_name}:/trusted-issuers.p12
+      - ./verifier/config/verifier.p12:/verifier.p12:ro
+      - ./verifier/config/trusted-issuers.p12:/trusted-issuers.p12
     networks:
       - verifier
 
@@ -193,7 +193,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - {CRL_LOCATION}:/var/www/ca/eudiw-poc-nl-root-ca-01.crl:ro
+      - ./nginx/crl/:/var/www/ca/:ro
       - ./nginx/:/etc/nginx/conf.d/:ro
     networks:
       - verifier

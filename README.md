@@ -13,7 +13,7 @@ The configuration in this repository is based on that of the official EUDI Refer
 > The configuration in this repository is for the following versions of the EUDI Reference Implementation:
 > 
 > _Verifier_
-> - eu-digital-identity-wallet/eudi-web-verifier:**v0.7.0**
+> - eu-digital-identity-wallet/eudi-web-verifier:**v0.7.1**
 > - eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:**v0.4.0**
 >
 > _Issuer (Python)_
@@ -22,7 +22,7 @@ The configuration in this repository is based on that of the official EUDI Refer
 > _Issuer (Kotlin)_
 > - eu-digital-identity-wallet/eudi-srv-pid-issuer:**v0.3.5**
 >
-> _Wallet (Android)
+> _Wallet (Android)_
 > - eu-digital-identity-wallet/eudi-app-android-wallet-ui:**Wallet/Demo_Version=2025.04.25-Demo_Build=25**
 
 
@@ -135,7 +135,7 @@ The default Verifier UI can only deployed on the `/` context root. As we want to
 2. Apply the patch in the verifier-ui directory of this repository to the cloned repository: 
     ```
     cd <cloned-repo>
-    git checkout v0.7.0
+    git checkout v0.7.1
     patch -p1 < <verifier-ui>/package.json.patch
     ```
 3. Build the container:

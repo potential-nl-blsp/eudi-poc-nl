@@ -69,7 +69,7 @@ services:
     command:
       - start-dev
       - --import-realm
-      - --features=dpop
+      #- --features=dpop
     environment:
       - KC_PROXY_HEADERS=xforwarded
       - KC_HTTP_ENABLED=true
